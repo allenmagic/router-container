@@ -106,8 +106,9 @@ in
             inherit upstreams;
           })
         ]
-        ++ optional (cfg.macAddresses != { })
-          (import ./guest/mac.nix { inherit (cfg) macAddresses; inherit pkgs; })
+        # 无条件：改名是必需的（nspawn 的 veth 名字随 systemd 版本变），
+        # 固定 MAC 才是可选的（macAddresses 为空时脚本只做改名）。
+        ++ [ (import ./guest/mac.nix { inherit (cfg) macAddresses lanInterface; inherit pkgs; }) ]
         ++ optional (cfg.vpn.transit.interface != null && cfg.vpn.transit.fakeIpCidrs != [ ])
           (import ./guest/transit.nix {
             inherit (cfg.vpn.transit) interface fakeIpCidrs;
