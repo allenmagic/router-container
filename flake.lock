@@ -1,0 +1,48 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1789542786,
+        "narHash": "sha256-ajQuqcxnj6RYnwCjA/9FTCnrdR2+BDzstE8UembXf60=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4c7870105e7f1fdf9c48688c8d7efc21abf0688a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "yunshu-nix": "yunshu-nix"
+      }
+    },
+    "yunshu-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789403203,
+        "narHash": "sha256-y0kkeip+Xr0BimlVf1wYqgxJ7g+FGcDCTBVatqzuwTU=",
+        "owner": "allenmagic",
+        "repo": "yunshu-nix",
+        "rev": "ff2af6b269955a59114e59b605663bd91c420fe9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "allenmagic",
+        "repo": "yunshu-nix",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
