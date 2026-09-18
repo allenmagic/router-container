@@ -19,11 +19,11 @@ in
 
     lanInterface = mkOption {
       type = types.str;
-      default = "host0";
+      default = "lan";
       description = ''
-        容器内 LAN 口名。**不是可随意改的**：nspawn 的 --network-veth 创建的
-        容器侧接口固定叫 host0，改名要额外的 udev 规则，而 macvlan 时代那套
-        `.link` 改名静默失效过一次，不值得再赌。
+        容器内 LAN 口名。nspawn 给的名字随 systemd 版本变（man 页写 host0，
+        260 实测给的是 eth0），所以 mac.nix 按接口类型找出来改成这个名字，
+        不赌默认值。
       '';
     };
 
@@ -41,8 +41,10 @@ in
 
     wanInterface = mkOption {
       type = types.str;
-      default = "eth1";
-      description = "容器内 WAN 口名。";
+      default = "wan";
+      description = ''
+        容器内 WAN 口名。macvlan 由 nspawn 直接按这个名字建，不经改名那一步。
+      '';
     };
 
     address = mkOption {
@@ -65,8 +67,13 @@ in
     dhcpRange = mkOption {
       type = types.nullOr types.str;
       default = null;
-      example = "host0,192.168.10.100,192.168.10.200,255.255.255.0,12h";
-      description = "DHCP 地址池。null = 不做 DHCP。";
+      example = "lan,192.168.10.100,192.168.10.200,255.255.255.0,12h";
+      description = ''
+        DHCP 地址池。null = 不做 DHCP。
+
+        ⚠️ 第一段是**接口名**（dnsmasq 的 dhcp-range 语法），必须与 lanInterface
+        一致——它不会被自动补上，写错就是 dnsmasq 监听一个不存在的接口、静默不发租约。
+      '';
     };
 
     dhcpOptions = mkOption {
@@ -80,8 +87,8 @@ in
       type = types.attrsOf types.str;
       default = { };
       example = {
-        host0 = "02:00:00:02:00:11";
-        eth1 = "02:00:00:02:00:12";
+        lan = "02:00:00:02:00:11";
+        wan = "02:00:00:02:00:12";
       };
       description = ''
         容器内接口的固定 MAC。nspawn 每次重建容器都随机生成，漂了的后果是

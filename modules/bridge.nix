@@ -59,7 +59,7 @@ in
         # WAN 口：同样不配地址，但**必须由 networkd 管起来才会 UP**。
         # 少了这份配置链接会一直是 DOWN 状态，挂在它上面的 macvlan 拿不到载波，
         # 而 nspawn 的网络建立是一步完成的——macvlan 失败会连 LAN 侧的 veth
-        # 一起中止，容器里既没有 WAN 也没有 host0，boot 卡在等 network-online。
+        # 一起中止，容器里既没有 wan 也没有 lan，boot 卡在等 network-online。
         "20-${cfg.wanParent}" = {
           matchConfig.Name = cfg.wanParent;
           networkConfig = {
