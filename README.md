@@ -13,14 +13,20 @@
 
   router = {
     enable = true;
-    hostLanPort = "lan0";       # 宿主机上要挂进桥的物理口
+    hostLanPort = "lan";        # 宿主机上要挂进桥的物理口
     hostAddress = "192.168.10.2/24";
     hostDefaultGateway = "192.168.10.1";
-    wanParent = "wan0";         # WAN 侧 macvlan 的父口
+    wanParent = "wan";          # WAN 侧 macvlan 的父口
     address = "192.168.10.1";   # 客户端的网关与 DNS
 
     dhcpRange = "host0,192.168.10.100,192.168.10.200,255.255.255.0,12h";
     dhcpOptions = [ "3,192.168.10.1" "6,192.168.10.1" ];
+
+    # nspawn 每次重建都随机生成 MAC，不固定的话上游租约与按 MAC 绑定都会漂
+    macAddresses = {
+      host0 = "02:00:00:02:00:11";
+      eth1 = "02:00:00:02:00:12";
+    };
 
     vpn = inputs.router-container.vpns.yunshu;   # 换实现就换这一行
   };
@@ -35,10 +41,14 @@ NAT / DHCP / DNS 单独验证通过。
 | 侧 | 接法 | 为什么 |
 |---|---|---|
 | LAN | **bridge**（nspawn veth → `br-lan`，容器内叫 `host0`） | macvlan 下宿主机看不见容器间流量、跨容器 DNAT 不工作、carrier 要等父口就绪（造成服务启动竞态）；bridge 下这些都是普通 L2 |
-| WAN | **macvlan**（父口 `wan0`，容器内 `eth1`） | nspawn 的 `--network-bridge` 只作用于 `--network-veth` 那一个接口，容器只能有一个桥接口；WAN 侧 macvlan 本来也没出过问题 |
+| WAN | **macvlan**（父口 `wan`，容器内 `eth1`） | nspawn 的 `--network-bridge` 只作用于 `--network-veth` 那一个接口，容器只能有一个桥接口；WAN 侧 macvlan 本来也没出过问题 |
 
 容器内 LAN 口名是 `host0`，**不是可随意改的**——nspawn 固定给这个名字，
 改名要额外的 udev 规则，而 macvlan 时代 `.link` 改名静默失效过一次。
+
+⚠️ 但**别写死它**：容器的接口整备（`modules/guest/mac.nix`）按"是不是 veth"
+找出容器侧接口再改名 —— nspawn 给的名字随 systemd 版本变（man 页写 `host0`，
+systemd 260 实测给的是 `eth0`）。写死任何一个，换版本就静默失配。
 
 ## 契约
 
