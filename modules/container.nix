@@ -135,6 +135,12 @@ in
             extraForwardRules = ''iifname "${cfg.lanInterface}" accept'';
             allowedTCPPorts = [ 53 ];
             allowedUDPPorts = [ 53 67 ]; # 53 DNS，67 DHCP 服务端
+
+            # 路由器不能用 strict（NixOS 默认）：它会生成一条 prerouting 优先级、
+            # policy drop 的 rpfilter 链，只放行"源地址能从同一接口路由回去"的包。
+            # 多宿主机 + 隧道（fake-IP → tun0）的非对称路径会被误伤。
+            # 注意 nat.nix 里的 rp_filter sysctl 管不到这条链——那是内核层，这是 nftables 层。
+            checkReversePath = "loose";
           };
         };
 
