@@ -3,8 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # 用 git+https 不用 github: 简写：后者走 codeload 的 tarball 下载，
+    # 国内会被截断（"Truncated tar archive"）。yunshu-nix 里入库了 arm64
+    # payload，tarball 有几十 MB，实测就被截断过。
     yunshu-nix = {
-      url = "github:allenmagic/yunshu-nix";
+      url = "git+https://github.com/allenmagic/yunshu-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
