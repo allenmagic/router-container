@@ -75,6 +75,19 @@ in
       example = [ "3,192.168.10.1" "6,192.168.10.1" ];
       description = "额外的 DHCP option（不含接口名前缀）。";
     };
+
+    macAddresses = mkOption {
+      type = types.attrsOf types.str;
+      default = { };
+      example = {
+        host0 = "02:00:00:02:00:11";
+        eth1 = "02:00:00:02:00:12";
+      };
+      description = ''
+        容器内接口的固定 MAC。nspawn 每次重建容器都随机生成，漂了的后果是
+        上游 DHCP 租约变化、上游按 MAC 绑定失效、宿主 ARP 表认成新设备。
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -93,6 +106,8 @@ in
             inherit upstreams;
           })
         ]
+        ++ optional (cfg.macAddresses != { })
+          (import ./guest/mac.nix { inherit (cfg) macAddresses; inherit pkgs; })
         ++ optional (cfg.vpn.transit.interface != null && cfg.vpn.transit.fakeIpCidrs != [ ])
           (import ./guest/transit.nix {
             inherit (cfg.vpn.transit) interface fakeIpCidrs;
