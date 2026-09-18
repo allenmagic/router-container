@@ -132,7 +132,11 @@ in
 
           firewall = {
             filterForward = true;
-            extraForwardRules = ''iifname "${cfg.lanInterface}" accept'';
+            extraForwardRules = ''
+              # 隧道 MTU 小于 1500，LAN 客户端发满包进去会被丢。clamp MSS 防 PMTUD 黑洞。
+              tcp flags syn tcp option maxseg size set rt mtu
+              iifname "${cfg.lanInterface}" accept
+            '';
             allowedTCPPorts = [ 53 ];
             allowedUDPPorts = [ 53 67 ]; # 53 DNS，67 DHCP 服务端
 
