@@ -29,7 +29,7 @@ in
 
     wanParent = mkOption {
       type = types.str;
-      example = "wan0";
+      example = "wan";
       description = ''
         WAN 侧做 macvlan 的父口。
 
@@ -126,8 +126,13 @@ in
             }
           ];
           interfaces.${cfg.wanInterface}.useDHCP = true;
-          # dhcpcd 别去写 /etc/resolv.conf：那是下面写死的 store 符号链接
-          dhcpcd.extraConfig = "nohook resolv.conf";
+          # nohook：/etc/resolv.conf 是下面写死的 store 符号链接，dhcpcd 写它会报错。
+          # hostname：dhcpcd **默认不发** hostname（option 12），不写这行上游设备列表
+          # 里只有 MAC，而我们的 MAC 是本地管理地址，一堆容器看起来一模一样。
+          dhcpcd.extraConfig = ''
+            nohook resolv.conf
+            hostname ${cfg.name}
+          '';
           resolvconf.enable = false;
 
           firewall = {

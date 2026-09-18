@@ -9,7 +9,7 @@ in
   options.router = {
     hostLanPort = mkOption {
       type = types.str;
-      example = "lan0";
+      example = "lan";
       description = "宿主机上要挂进 LAN 桥的物理口（按 MAC 锚定的名字）。";
     };
 
